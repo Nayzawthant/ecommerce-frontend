@@ -25,7 +25,7 @@
     width: 82%;
     margin: 0 auto;
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns:1fr 1fr 1fr 1fr;
     row-gap: 80px;
     column-gap: 40px;
 }

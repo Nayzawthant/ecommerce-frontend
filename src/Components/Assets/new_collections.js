@@ -8,7 +8,20 @@ import p7_img from "./product_17.png";
 import p8_img from "./product_28.png";
 
 let new_collections = [
-  
+  {
+    id: 12,
+    name: "Men Green Solid Zippered Full-Zip Slim Fit Bomber Jacket",
+    image: p2_img,
+    new_price: 60.0,
+    old_price: 100.5,
+  },
+  {
+    id: 1,
+    name: "Striped Flutter Sleeve Overlap Collar Peplum Hem Blouse",
+    image: p1_img,
+    new_price: 100.0,
+    old_price: 150.0,
+  },
   {
     id: 14,
     name: "Men Green Solid Zippered Full-Zip Slim Fit Bomber Jacket",
