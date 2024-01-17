@@ -67,6 +67,7 @@
 @media(max-width:800px) {
     .popular {
         margin-top: 30px;
+        margin-bottom: 0px;
         gap: 6px;
     }
     .popular h1 {
