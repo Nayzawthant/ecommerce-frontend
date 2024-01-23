@@ -1,97 +1,74 @@
-// import React, { createContext, useState } from "react";
-// import all_product from "../Components/Assets/all_product";
-
-// export const ShopContext = createContext(null);
-
-// const getDefaultCart = () => {
-//     let cart = {};
-//     for (let index = 0; index < all_product.length+1; index++) {
-//         cart[index] = 0;
-//     }
-//     return cart;
-// }
-// const ShopContextProvider = (props) => {
-
-//     const [cartItems, setCartItems] = useState(getDefaultCart());
-    
-
-//     const addToCart = (itemId) => {
-//         setCartItems((prev) => ({...prev,[itemId]:prev[itemId]+1}));
-//         console.log(cartItems);
-//     }
-
-//     const removeFromCart = (itemId) => {
-//         setCartItems((prev) => ({...prev,[itemId]:prev[itemId]-1}))
-//     }
-
-//     // const getTotalCartAmount = () => {
-//     //     let totalAmount = 0;
-//     //     for(const item in cartItems)
-//     //     {
-//     //         if(cartItems[item]>0) {
-//     //             let itemInfo = all_product.find((product)=>product.id===Number(item))
-//     //             totalAmount += itemInfo.new_price * cartItems[item];
-//     //         } else {
-//     //             console.log("false");
-//     //         }
-//     //         return totalAmount;
-//     //     }
-//     // }
-//     const getTotalCartAmount = () => {
-//         let totalAmount = 0;
-    
-//         cartItems.forEach((quantity, itemId) => {
-//             if (quantity > 0) {
-//                 let itemInfo = all_product.find((product) => product.id === Number(itemId));
-//                 if (itemInfo) {
-//                     totalAmount += itemInfo.new_price * quantity;
-//                 } else {
-//                     console.log("Item not found in product list");
-//                 }
-//             } else {
-//                 console.log("Quantity should be greater than 0");
-//             }
-//         });
-    
-//         return totalAmount;
-//     };
-    
-    
-//     const contextValue = {getTotalCartAmount, all_product, cartItems, addToCart, removeFromCart};
-
-//     return (
-//         <ShopContext.Provider value={contextValue}>
-//             {props.children}
-//         </ShopContext.Provider>
-//     )
-// }
-
-// export default ShopContextProvider;
 
 
-import React, { createContext, useState } from "react";
-import all_product from "../Components/Assets/all_product";
+
+import React, { createContext, useEffect, useState } from "react";
+
 
 export const ShopContext = createContext(null);
 
+// const getDefaultCart = () => {
+//     const cart = {};
+//     all_product.forEach(product => {
+//         cart[product.id] = 0;
+//     });
+//     return cart;
+// }
 const getDefaultCart = () => {
-    const cart = {};
-    all_product.forEach(product => {
-        cart[product.id] = 0;
-    });
-    return cart;
-}
+    const defaultCart = Array.from({ length: 301 }, (_, index) => index).reduce((cart, itemId) => {
+        cart[itemId] = 0;
+        return cart;
+    }, {});
+
+    return defaultCart;
+};
 
 const ShopContextProvider = (props) => {
+
+    const [all_product, setAll_Product] = useState([]);
+
     const [cartItems, setCartItems] = useState(getDefaultCart());
 
-    const addToCart = (itemId) => {
-        setCartItems((prev) => {
-            const updatedCart = { ...prev, [itemId]: prev[itemId] + 1 };
-            console.log(updatedCart);
-            return updatedCart;
-        });
-    }
+    console.log("cartitems", cartItems)
+
+    useEffect(() => {
+        fetch('http://localhost:5000/allproducts') 
+        .then((response) => response.json())
+        .then((data) => setAll_Product(data))
+    },[])
+
+    const addToCart = async (itemId) => {
+        try {
+            // Update local state
+            setCartItems((prev) => ({ ...prev, [itemId]: prev[itemId] + 1 }));
+    
+            // Check if the user is authenticated
+            const authToken = localStorage.getItem('auth-token');
+            if (authToken) {
+                // Perform asynchronous fetch
+                const response = await fetch('http://localhost:5000/addtocart', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'auth-token': authToken,
+                    },
+                    body: JSON.stringify({"itemId":itemId }),
+                });
+    
+                if (!response.ok) {
+                    throw new Error(`Failed to add item to cart. Status: ${response.status}`);
+                }
+    
+                const data = await response.json();
+                // Handle successful response data
+                console.log(data);
+            }
+        } catch (error) {
+            // Handle any unexpected errors
+            console.error('An unexpected error occurred:', error.message);
+            // You can add additional error handling logic here
+        }
+    };
+    
 
     const removeFromCart = (itemId) => {
         setCartItems((prev) => {
