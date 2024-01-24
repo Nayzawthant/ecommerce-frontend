@@ -34,6 +34,20 @@ const ShopContextProvider = (props) => {
         fetch('http://localhost:5000/allproducts') 
         .then((response) => response.json())
         .then((data) => setAll_Product(data))
+
+        const authToken = localStorage.getItem('auth-token');
+        if(authToken) {
+            fetch('http://localhost:5000/getcart', {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/form-data',
+                    'Content-Type': 'application/json',
+                    'auth-token': authToken,
+                },
+                body: "",
+            }).then((response)=>response.json())
+            .then((data) => setCartItems(data));
+        }
     },[])
 
     const addToCart = async (itemId) => {
@@ -70,13 +84,36 @@ const ShopContextProvider = (props) => {
     };
     
 
-    const removeFromCart = (itemId) => {
-        setCartItems((prev) => {
-            const updatedCart = { ...prev, [itemId]: Math.max(0, prev[itemId] - 1) };
-            console.log(updatedCart);
-            return updatedCart;
-        });
-    }
+    const removeFromCart = async (itemId) => {
+        try {
+            setCartItems((prev) => ({ ...prev, [itemId]: prev[itemId] - 1 }));
+            
+            // Check if the user is authenticated
+            const authToken = localStorage.getItem('auth-token');
+
+            if (authToken) {
+                const response = await fetch('http://localhost:5000/removefromcart', {
+                    method: 'POST',
+                    headers: {
+                        Accept: 'application/json',
+                        'auth-token': authToken,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ itemId: itemId }),
+                });
+    
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log(data);
+                } else {
+                    console.error('Failed to remove item from cart.');
+                }
+            }
+        } catch (error) {
+            console.error('Error in removeFromCart:', error);
+        }
+    };
+    
 
     const getTotalCartAmount = () => {
         let totalAmount = 0;

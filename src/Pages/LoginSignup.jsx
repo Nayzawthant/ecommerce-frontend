@@ -7,7 +7,7 @@ const LoginSignup = () => {
   const [formData, setFormData] = useState({
     username: "",
     password: "",
-    email: ""
+    email: "",
   })
 
   const changeHandler = (e) => {
